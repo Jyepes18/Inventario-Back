@@ -31,6 +31,24 @@ namespace Inventario_Back.Model.Productos
             return Ok(result);
         }
 
+        [HttpPost]
+        [Route("paginados/{page}/{pageSize}")]
+        public async Task<IActionResult> ObtenerListadoPaginadosProductos([FromRoute] int page, [FromRoute] int pageSize, [FromBody] ProductoFilter productoFilter)
+        {
+            var result = await _productoService.ObtenerListadoProductos(page, pageSize, productoFilter);
+            return Ok(new
+            {
+                productos = result.Item1,
+                total = result.total
+            });
+        }
 
+        [HttpDelete]
+        [Route("eliminar/{Id}")]
+        public async Task<IActionResult> EliminarProducto([FromRoute] int Id)
+        {
+            var result = await _productoService.EliminarProducto(Id);
+            return Ok(result);
+        }
     }   
 }
