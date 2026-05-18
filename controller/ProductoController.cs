@@ -50,5 +50,13 @@ namespace Inventario_Back.Model.Productos
             var result = await _productoService.EliminarProducto(Id);
             return Ok(result);
         }
+
+        [HttpPost]
+        [Route("actualizar")]
+        public async Task<IActionResult> ActualizarProductoAsync ([FromBody] Producto producto)
+        {
+            var result = await _productoService.ActualizarProducto(producto);
+            return Ok(result);
+        }
     }   
 }

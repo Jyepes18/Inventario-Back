@@ -9,5 +9,6 @@ namespace Inventario_Back.interfaces
         Task<Producto> ObtenerProducto(int Id);
         Task<(ICollection<Producto>, int total)> ObtenerListadoProductos(int page, int pageSize, ProductoFilter productoFilter);
         Task<int> EliminarProducto(int Id);
+        Task<int> ActualizarProducto(Producto producto);
     }
 }

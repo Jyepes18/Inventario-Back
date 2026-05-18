@@ -37,22 +37,23 @@ namespace Inventario_Back.services
 
                 var result = await connection.ExecuteAsync(insertarProducto, new
                 {
-                    nombre = producto.Nombre, 
-                    descripcion = producto.Descripcion, 
-                    codigo = producto.Codigo, 
-                    cantidad = producto.Cantidad, 
-                    precio = producto.Precio, 
+                    nombre = producto.Nombre,
+                    descripcion = producto.Descripcion,
+                    codigo = producto.Codigo,
+                    cantidad = producto.Cantidad,
+                    precio = producto.Precio,
                     precioventa = producto.PrecioVenta,
                     categoriaid = producto.categoriaId
                 });
 
                 await connection.DisposeAsync();
 
-                if(result > 0)
+                if (result > 0)
                     return 201;
 
                 return 400;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Error al generar producto::CrearProducto ", ex);
             }
@@ -89,14 +90,15 @@ namespace Inventario_Back.services
 
                 var result = await connection.QueryFirstOrDefaultAsync<Producto>(buscarProducto, new
                 {
-                   id = Id 
+                    id = Id
                 });
 
-                if(result != null)
+                if (result != null)
                     return result;
 
-                return null;                
-            }catch(Exception ex)
+                return null;
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Erro al obtener producto por id::ObtenerProducto ", ex);
             }
@@ -120,7 +122,7 @@ namespace Inventario_Back.services
                 string contarProductos = @"
                     select COUNT(p.*) from producto p where (@Nombre is null or p.nombre ilike '%' || @Nombre || '%')
                 ";
-                
+
                 var totalProductos = await connection.QueryAsync<int>(contarProductos, new
                 {
                     Nombre = productoFilter.Nombre ?? null
@@ -146,8 +148,8 @@ namespace Inventario_Back.services
                 ";
 
                 var Offset = (page - 1) * pageSize;
-                        
-                var listadoProductos = await  connection.QueryAsync<Producto>(obtenerDatos, new
+
+                var listadoProductos = await connection.QueryAsync<Producto>(obtenerDatos, new
                 {
                     Offset = Offset,
                     PageSize = pageSize,
@@ -158,12 +160,12 @@ namespace Inventario_Back.services
 
                 return (listadoProductos.ToList(), totalProductos.Single());
 
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Error al obtener listado ", ex);
             }
         }
-
 
         /// <summary>
         /// Elimina un producto 
@@ -181,23 +183,77 @@ namespace Inventario_Back.services
                 string eliminarProducto = @"
                     delete from producto where id = @Id;
                 ";
-                
+
                 var ProductoEliminado = await connection.ExecuteAsync(eliminarProducto, new
                 {
                     Id = Id
                 });
 
                 await connection.DisposeAsync();
-                
-                if(ProductoEliminado > 0)
+
+                if (ProductoEliminado > 0)
                     return 200;
 
 
                 return 404;
 
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception("Error al obtener listado ", ex);
+            }
+        }
+
+        /// <summary>
+        /// Actualizar un producto
+        /// </summary>
+        /// <param name="producto">Modelo con los datos necesarios para actualizar el producto</param>
+        /// <returns>
+        /// entero que si es mayor a 1 se devolverá un 200 (actualizado)
+        /// y si no un 400 (error)
+        /// </returns>
+        public async Task<int> ActualizarProducto(Producto producto)
+        {
+            try
+            {
+                string actualizarProducto = @"
+                    update producto
+                    set 
+                        nombre = @nombre,
+                        descripcion = @descripcion,
+                        codigo = @codigo,
+                        cantidad = @cantidad,
+                        precio = @precio,
+                        precioventa = @precioventa,
+                        categoriaid = @categoriaid
+                    where id = @id
+                ";
+
+                await using var connection = new NpgsqlConnection(_connection);
+                await connection.OpenAsync();
+
+                var result = await connection.ExecuteAsync(actualizarProducto, new
+                {
+                    id = producto.Id,
+                    nombre = producto.Nombre,
+                    descripcion = producto.Descripcion,
+                    codigo = producto.Codigo,
+                    cantidad = producto.Cantidad,
+                    precio = producto.Precio,
+                    precioventa = producto.PrecioVenta,
+                    categoriaid = producto.categoriaId
+                });
+
+                await connection.DisposeAsync();
+
+                if (result > 0)
+                    return 200;
+
+                return 400;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al actualizar producto::ActualizarProducto ", ex);
             }
         }
     }
